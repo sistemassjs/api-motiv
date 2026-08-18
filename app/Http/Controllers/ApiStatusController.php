@@ -11,7 +11,7 @@ use Illuminate\Http\JsonResponse;
 class ApiStatusController extends Controller
 {
     /** Versión de la API (actualizar a mano en cada release). */
-    public const VERSION = '1.0.0';
+    public const VERSION = '1.0.1';
 
     public function __invoke(): JsonResponse
     {
