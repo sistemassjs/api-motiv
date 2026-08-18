@@ -1,0 +1,47 @@
+name: Desplegar a VPS
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: deploy-produccion-api-motiv
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Publicar en VPS
+    runs-on: ubuntu-latest
+    steps:
+      - name: Desplegar por SSH
+        uses: appleboy/ssh-action@v1.2.5
+        env:
+          APP_DIR: ${{ secrets.VPS_APP_DIR }}
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          envs: APP_DIR
+          command_timeout: 15m
+          script: |
+            set -euo pipefail
+            cd "$APP_DIR"
+            trap 'php artisan up || true' EXIT
+            php artisan down --retry=60 || true
+            git fetch origin main
+            git reset --hard origin/main
+            composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+            php artisan migrate --force --no-interaction
+            php artisan optimize:clear
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            php artisan storage:link || true
+            php artisan up
+
+      - name: Comprobar health
+        run: curl -fsS --retry 5 --retry-delay 2 https://api.rorisafe.com/motiv/api/status
