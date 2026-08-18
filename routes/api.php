@@ -29,6 +29,7 @@ use App\Http\Controllers\MantenimientosProximosController;
 use App\Services\NumeroEconomicoService;
 use App\Http\Controllers\EquipoArchivoController;
 use App\Http\Controllers\EquipoArchivoTemporalController;
+use App\Http\Controllers\ApiStatusController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,6 +37,7 @@ use App\Http\Controllers\EquipoArchivoTemporalController;
 |--------------------------------------------------------------------------
 */
 
+Route::get('status', ApiStatusController::class);
 Route::get('install/status', [InstallController::class, 'status']);
 Route::post('install', [InstallController::class, 'install']);
 
